@@ -1,0 +1,82 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <iomanip>
+
+using namespace std;
+
+class Process {
+public:
+    int pid;   // Process ID
+    int bt;    // Burst Time
+    int pr;    // Priority
+    int wt;    // Waiting Time
+    int tat;   // Turnaround Time
+
+    Process(int id, int burstTime, int priority) 
+        : pid(id), bt(burstTime), pr(priority), wt(0), tat(0) {}
+};
+
+int main() {
+    int n;
+    cout << "-----------PRIORITY SCHEDULING--------------\n";
+    cout << "Enter the number of processes: ";
+    cin >> n;
+
+    vector<Process> processes;
+    for (int i = 0; i < n; ++i) {
+        int bt, pr;
+        cout << "Enter the Burst Time of Process " << i << ": ";
+        cin >> bt;
+        cout << "Enter the Priority of Process " << i << ": ";
+        cin >> pr;
+        processes.emplace_back(i, bt, pr);
+    }
+
+    // Sorting by priority
+    sort(processes.begin(), processes.end(), [](const Process& a, const Process& b) {
+        return a.pr < b.pr;
+    });
+
+    // Calculating waiting time and turnaround time
+    processes[0].tat = processes[0].bt;
+    for (int i = 1; i < n; ++i) {
+        processes[i].wt = processes[i - 1].wt + processes[i - 1].bt;
+        processes[i].tat = processes[i].wt + processes[i].bt;
+    }
+
+    // Display results
+    cout << "\n---------------------------------------------------------------\n";
+    cout << "Pid\tPriority\tBT\tWT\tTAT\n";
+    cout << "---------------------------------------------------------------\n";
+    for (const auto& p : processes) {
+        cout << p.pid << "\t" << p.pr << "\t\t" << p.bt << "\t" << p.wt << "\t" << p.tat << "\n";
+    }
+
+    // Calculate average WT and TAT
+    int totalWT = 0, totalTAT = 0;
+    for (const auto& p : processes) {
+        totalWT += p.wt;
+        totalTAT += p.tat;
+    }
+    float avgWT = static_cast<float>(totalWT) / n;
+    float avgTAT = static_cast<float>(totalTAT) / n;
+
+    cout << "\nAverage Waiting Time: " << fixed << setprecision(2) << avgWT;
+    cout << "\nAverage Turnaround Time: " << fixed << setprecision(2) << avgTAT << "\n";
+
+    return 0;
+}
+
+
+// 4
+// 2
+// 3
+// 6
+// 2
+// 4
+// 1
+// 5
+// 7
+
+

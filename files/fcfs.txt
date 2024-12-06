@@ -1,0 +1,126 @@
+
+
+#include <iostream>
+#include <vector>
+#include <iomanip>
+
+using namespace std;
+
+class Process {
+private:
+    int pid;            // Process ID
+    int arrivalTime;    // Arrival Time
+    int burstTime;      // Burst Time
+    int completionTime; // Completion Time
+    int turnAroundTime; // Turnaround Time
+    int waitingTime;    // Waiting Time
+
+public:
+    // Constructor
+    Process(int id, int at, int bt)
+        : pid(id), arrivalTime(at), burstTime(bt), completionTime(0), turnAroundTime(0), waitingTime(0) {}
+
+    // Getters
+    int getPid() const { return pid; }
+    int getArrivalTime() const { return arrivalTime; }
+    int getBurstTime() const { return burstTime; }
+    int getCompletionTime() const { return completionTime; }
+    int getTurnAroundTime() const { return turnAroundTime; }
+    int getWaitingTime() const { return waitingTime; }
+
+    // Setters
+    void setCompletionTime(int ct) { completionTime = ct; }
+    void setTurnAroundTime(int tat) { turnAroundTime = tat; }
+    void setWaitingTime(int wt) { waitingTime = wt; }
+
+    // Display process details
+    void display() const {
+        cout << left << setw(10) << pid
+             << setw(15) << arrivalTime
+             << setw(15) << burstTime
+             << setw(20) << completionTime
+             << setw(20) << turnAroundTime
+             << setw(15) << waitingTime << endl;
+    }
+};
+
+class FCFS {
+private:
+    vector<Process> processes;
+
+public:
+    // Add a process
+    void addProcess(int id, int arrivalTime, int burstTime) {
+        processes.emplace_back(id, arrivalTime, burstTime);
+    }
+
+    // Calculate FCFS scheduling details
+    void calculateSchedule() {
+        int currentTime = 0;
+
+        for (auto& process : processes) {
+            if (currentTime < process.getArrivalTime()) {
+                currentTime = process.getArrivalTime();
+            }
+
+            int completionTime = currentTime + process.getBurstTime();
+            int turnAroundTime = completionTime - process.getArrivalTime();
+            int waitingTime = turnAroundTime - process.getBurstTime();
+
+            process.setCompletionTime(completionTime);
+            process.setTurnAroundTime(turnAroundTime);
+            process.setWaitingTime(waitingTime);
+
+            currentTime = completionTime;
+        }
+    }
+
+    // Display the process table
+    void displayProcesses() const {
+        cout << left << setw(10) << "PID"
+             << setw(15) << "Arrival Time"
+             << setw(15) << "Burst Time"
+             << setw(20) << "Completion Time"
+             << setw(20) << "Turnaround Time"
+             << setw(15) << "Waiting Time" << endl;
+
+        for (const auto& process : processes) {
+            process.display();
+        }
+    }
+};
+
+int main() {
+    int n;
+    cout << "Enter the number of processes: ";
+    cin >> n;
+
+    FCFS scheduler;
+
+    cout << "Enter Arrival Time and Burst Time for each process:\n";
+    for (int i = 0; i < n; ++i) {
+        int arrivalTime, burstTime;
+        cout << "Process " << i + 1 << ":\n";
+        cout << "Arrival Time: ";
+        cin >> arrivalTime;
+        cout << "Burst Time: ";
+        cin >> burstTime;
+
+        scheduler.addProcess(i + 1, arrivalTime, burstTime);
+    }
+
+    scheduler.calculateSchedule();
+
+    cout << "\nProcess Execution Table:\n";
+    scheduler.displayProcesses();
+
+
+
+
+
+
+    return 0;
+}
+
+
+

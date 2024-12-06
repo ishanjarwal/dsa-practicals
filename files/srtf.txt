@@ -1,0 +1,129 @@
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+// Class representing a process
+class Process {
+public:
+    int pid;  // Process ID
+    int at;   // Arrival time of the process
+    int bt;   // Total burst time
+    int rt;   // Remaining time for execution
+    int ct;   // Completion time of the process
+    int tat;  // Turnaround time of the process
+    int wt;   // Waiting time of the process
+
+    Process(int pid, int at, int bt) {
+        this->pid = pid;
+        this->at = at;
+        this->bt = bt;
+        this->rt = bt;
+        this->ct = 0;
+        this->tat = 0;
+        this->wt = 0;
+    }
+};
+
+// Class for Shortest Remaining Time First (SRTF) Scheduling Algorithm
+class SRTFScheduler {
+private:
+    vector<Process> processes;
+    int n;  // Total number of processes
+
+public:
+    SRTFScheduler(int n) {
+        this->n = n;
+    }
+
+    // Method to add a process to the scheduler
+    void addProcess(int pid, int at, int bt) {
+        processes.push_back(Process(pid, at, bt));
+    }
+
+    // Method to calculate the SRTF scheduling
+    void schedule() {
+        int currentTime = 0;
+        int completed = 0;
+        vector<Process*> readyQueue;
+
+        // Sort processes by arrival time initially
+        sort(processes.begin(), processes.end(), [](Process &p1, Process &p2) {
+            return p1.at < p2.at;
+        });
+
+        while (completed < n) {
+            // Add processes that have arrived by current time to readyQueue
+            for (auto &p : processes) {
+                if (p.at <= currentTime && p.rt > 0) {
+                    readyQueue.push_back(&p);
+                }
+            }
+
+            if (readyQueue.empty()) {
+                currentTime++;
+                continue;
+            }
+
+            // Find the process with the shortest remaining time
+            Process* currentProcess = *min_element(readyQueue.begin(), readyQueue.end(), [](Process* p1, Process* p2) {
+                return p1->rt < p2->rt;
+            });
+
+            // Process the current process
+            currentProcess->rt--;
+            currentTime++;
+
+            // If the process is completed
+            if (currentProcess->rt == 0) {
+                currentProcess->ct = currentTime;
+                currentProcess->tat = currentProcess->ct - currentProcess->at;
+                currentProcess->wt = currentProcess->tat - currentProcess->bt;
+                completed++;
+            }
+
+            // Remove the completed process from the readyQueue
+            readyQueue.erase(remove(readyQueue.begin(), readyQueue.end(), currentProcess), readyQueue.end());
+        }
+
+        // Output the results
+        cout << "PID\tArrival Time\tBurst Time\tCompletion Time\tTurnaround Time\tWaiting Time\n";
+        for (auto &p : processes) {
+            cout << p.pid << "\t" << p.at << "\t\t" << p.bt << "\t\t" 
+                 << p.ct << "\t\t" << p.tat << "\t\t\t" << p.wt << "\n";
+        }
+
+        // Calculate and output average waiting time and turnaround time
+        float avgWT = 0, avgTAT = 0;
+        for (auto &p : processes) {
+            avgWT += p.wt;
+            avgTAT += p.tat;
+        }
+        cout << "Average Waiting Time: " << avgWT / n << "\n";
+        cout << "Average Turnaround Time: " << avgTAT / n << "\n";
+    }
+};
+
+int main() {
+    int n;
+    cout << "Enter the number of processes: ";
+    cin >> n;
+
+    SRTFScheduler scheduler(n);
+
+    for (int i = 0; i < n; i++) {
+        int pid, at, bt;
+        cout << "Enter Process " << i + 1 << " (PID, Arrival Time, Burst Time): ";
+        cin >> pid >> at >> bt;
+        scheduler.addProcess(pid, at, bt);
+    }
+
+    scheduler.schedule();
+
+    return 0;
+}
+
+

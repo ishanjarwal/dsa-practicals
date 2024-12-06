@@ -1,6 +1,8 @@
 
 ----------- List of Available Programs ----------------
 
+----------- DSA ---------------------------------------
+
 binary_search.txt
 bubble_sort.txt
 selection_sort.txt
@@ -14,4 +16,12 @@ queue_using_array.txt
 queue_using_linked_list.txt
 bfs.txt
 dfs.txt
+
+--------- OS ----------------------------------------------
+
+fcfs.txt
+sjf.txt
+srtf.txt
+priority.txt
+round_robin.txt
 

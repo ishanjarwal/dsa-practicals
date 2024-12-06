@@ -1,0 +1,62 @@
+
+
+#include <iostream>
+#include <vector>
+#include <iomanip>
+#include <algorithm>
+
+using namespace std;
+
+int main() {
+    int n, totalWT = 0, totalTAT = 0;
+    cout << "Enter number of processes: ";
+    cin >> n;
+
+    vector<int> burstTime(n), processID(n), waitingTime(n), turnAroundTime(n);
+
+    for (int i = 0; i < n; ++i) {
+        processID[i] = i + 1;
+        cout << "Enter Burst Time for Process " << i + 1 << ": ";
+        cin >> burstTime[i];
+    }
+
+    // Sort processes by burst time
+    for (int i = 0; i < n - 1; ++i) {
+        for (int j = i + 1; j < n; ++j) {
+            if (burstTime[i] > burstTime[j]) {
+                swap(burstTime[i], burstTime[j]);
+                swap(processID[i], processID[j]);
+            }
+        }
+    }
+
+    // Calculate waiting times
+    waitingTime[0] = 0;
+    for (int i = 1; i < n; ++i) {
+        waitingTime[i] = waitingTime[i - 1] + burstTime[i - 1];
+        totalWT += waitingTime[i];
+    }
+
+    // Calculate turnaround times
+    for (int i = 0; i < n; ++i) {
+        turnAroundTime[i] = waitingTime[i] + burstTime[i];
+        totalTAT += turnAroundTime[i];
+    }
+
+    // Display results
+    cout << "\nSHORTEST JOB FIRST SCHEDULING ALGORITHM\n";
+    cout << left << setw(15) << "Process ID" << setw(15) << "Burst Time" << setw(15) 
+         << "Waiting Time" << setw(15) << "Turnaround Time\n";
+
+    for (int i = 0; i < n; ++i) {
+        cout << left << setw(15) << processID[i] << setw(15) << burstTime[i]
+             << setw(15) << waitingTime[i] << setw(15) << turnAroundTime[i] << endl;
+    }
+
+    // Print average waiting and turnaround times
+    cout << "\nAverage Waiting Time: " << fixed << setprecision(2) << (float)totalWT / n;
+    cout << "\nAverage Turnaround Time: " << fixed << setprecision(2) << (float)totalTAT / n << endl;
+
+    return 0;
+}
+

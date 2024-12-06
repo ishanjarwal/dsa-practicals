@@ -1,0 +1,131 @@
+
+
+#include <iostream>
+#include <vector>
+#include <iomanip>
+#include <algorithm>
+
+using namespace std;
+
+class Process {
+public:
+    int processID;
+    int burstTime;
+    int remainingTime;
+    int waitingTime;
+    int turnAroundTime;
+
+    Process(int pid, int bt) {
+        processID = pid;
+        burstTime = bt;
+        remainingTime = bt;
+        waitingTime = 0;
+        turnAroundTime = 0;
+    }
+};
+
+class RoundRobinScheduler {
+private:
+    vector<Process> processes;
+    int timeSlice;
+    int totalWT = 0;
+    int totalTAT = 0;
+
+public:
+    RoundRobinScheduler(int ts) {
+        timeSlice = ts;
+    }
+
+    void addProcess(int pid, int bt) {
+        processes.push_back(Process(pid, bt));
+    }
+
+    void calculateScheduling() {
+        int remaining = processes.size();
+        int timeElapsed = 0;
+
+        while (remaining > 0) {
+            for (int i = 0; i < processes.size(); ++i) {
+                if (processes[i].remainingTime > 0) {
+                    int timeUsed = min(processes[i].remainingTime, timeSlice);
+                    processes[i].remainingTime -= timeUsed;
+                    timeElapsed += timeUsed;
+
+                    // Update waiting time for all processes except the currently running process
+                    for (int j = 0; j < processes.size(); ++j) {
+                        if (i != j && processes[j].remainingTime > 0) {
+                            processes[j].waitingTime += timeUsed;
+                        }
+                    }
+
+                    // If process has completed its burst time, update turnaround time and remaining processes count
+                    if (processes[i].remainingTime == 0) {
+                        processes[i].turnAroundTime = processes[i].waitingTime + processes[i].burstTime;
+                        totalWT += processes[i].waitingTime;
+                        totalTAT += processes[i].turnAroundTime;
+                        --remaining;
+                    }
+                }
+            }
+        }
+    }
+
+    void printResults() {
+        float avgWT = (float)totalWT / processes.size();
+        float avgTAT = (float)totalTAT / processes.size();
+
+        // Output results
+        cout << "\n\nROUND ROBIN SCHEDULING ALGORITHM\n\n";
+        cout << left << setw(10) << "Process" << setw(15) << "Process ID" << setw(15)
+             << "Burst Time" << setw(15) << "Waiting Time" << setw(15) << "Turnaround Time\n";
+
+        for (int i = 0; i < processes.size(); ++i) {
+            cout << left << setw(10) << i + 1 << setw(15) << processes[i].processID
+                 << setw(15) << processes[i].burstTime << setw(15) << processes[i].waitingTime
+                 << setw(15) << processes[i].turnAroundTime << "\n";
+        }
+
+        cout << "\nAverage Waiting Time: " << fixed << setprecision(2) << avgWT;
+        cout << "\nAverage Turnaround Time: " << fixed << setprecision(2) << avgTAT << endl;
+    }
+};
+
+int main() {
+    int n, timeSlice;
+
+    cout << "\t\tROUND ROBIN SCHEDULING USING CLASSES\n";
+    cout << "Enter the number of processes: ";
+    cin >> n;
+
+    cout << "Enter the Time Slice: ";
+    cin >> timeSlice;
+
+    RoundRobinScheduler scheduler(timeSlice);
+
+    // Input processes' burst times
+    for (int i = 0; i < n; ++i) {
+        int pid, bt;
+        cout << "\nEnter Process ID for Process " << i + 1 << ": ";
+        cin >> pid;
+        cout << "Enter Burst Time for Process " << i + 1 << ": ";
+        cin >> bt;
+        scheduler.addProcess(pid, bt);
+    }
+
+    scheduler.calculateScheduling();
+    scheduler.printResults();
+
+    return 0;
+}
+
+// 4
+// 5
+// 5
+// 10
+// 6
+// 15
+// 7
+// 20
+// 8
+// 25
+
